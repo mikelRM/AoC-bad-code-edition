@@ -40,15 +40,17 @@ int main()
       eng.linea = n_lineas;
       eng.columna = base + i;
       engranajes.push_back(eng);
-      base = i + 1;
-      i = linea.substr(i+1).find("*");
+      base = base + i + 1;
+      i = linea.substr(base).find("*");
     }
     
     // BÚSQUEDA DE TODOS LOS NÚMEROS
     base = 0;
     while (linea != "") {
       int i = linea.find_first_of(s_numeros);
-      if (i < 0 or i > linea.length()) break;
+      if (i < 0 or i > linea.length())
+	break;
+
       int l = linea.substr(i).find_first_not_of(s_numeros);
       if (l < 0)
 	l = linea.length() - i;
@@ -61,7 +63,7 @@ int main()
       numeros.push_back(num);
       
       linea = linea.substr(i + l);
-      base = base + l;
+      base = base + i + l;
     }
     
     n_lineas++;
@@ -70,7 +72,20 @@ int main()
 
   
   suma = 0;
-  // TODO: Resolver el probelma
+  for (Engranaje &eng : engranajes) {
+    for (Numero num : numeros) {
+      if ( abs(num.linea - eng.linea) > 1 )
+	continue;
+
+      if ( (num.columna <= eng.columna + 1) and (num.columna + num.digitos >= eng.columna) ) {
+	eng.n = eng.n + 1;
+	eng.numeros.push_back(num.numero);
+      }      
+    }
+
+    if ( eng.n == 2)
+      suma += eng.numeros[0] * eng.numeros[1];
+  }
   
   cout << "La respuesta a la parte 2 es: " << suma << endl;
 }
