@@ -2,20 +2,23 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <map>
 #include <algorithm>
 
 using namespace std;
 
 int main ()
 {
-  ifstream archivo("part1.in");
+  ifstream archivo("part2.in");
   string linea;
 
   int i_dosp, i_barra;			// Índices
   int juego;				// Número de juego
   vector<int> v_ganadores, v_carton;	// Vectores
 
-  int suma = 0;
+  map<int,vector<int>> m_ganadores, m_carton;
+  map<int,int> m_num_cartones;
+  
   while ( getline(archivo, linea) ) {
     v_ganadores.clear();
     v_carton.clear();
@@ -53,14 +56,39 @@ int main ()
       }
     }
 
+    m_ganadores.insert( {juego, v_ganadores} );
+    m_carton.insert( {juego, v_carton} );
+  }
+  int numero_de_juegos = juego;
+
+  for (int juego = 1; juego <= numero_de_juegos; juego++)
+    m_num_cartones.insert( {juego, 1} );
+
+  int suma = 0;
+  for (int juego = 1; juego <= numero_de_juegos; juego++) {
+    // Añadimos la cantidad de cartones al resultado
+    suma = suma + m_num_cartones[juego];
+
     int subtotal = 0;
-    for ( int num : v_ganadores ) {
-      if ( find(v_carton.begin(), v_carton.end(), num) != v_carton.end() )
-	subtotal = (subtotal > 0) ? subtotal * 2 : 1;
+    for ( int num : m_ganadores[juego] ) {
+      // Contamos cuantos cartones han sido premiados
+      if ( find(m_carton[juego].begin(),
+		m_carton[juego].end(),
+		num) != m_carton[juego].end() )
+	subtotal++;
     }
 
-    suma = suma + subtotal;
+    // Sumamos los cartones premiados
+    if (subtotal == 0)
+      continue;
+
+    for (int j = 1; j <= subtotal; j++) {
+      if ( juego + j > numero_de_juegos )
+	continue;
+      m_num_cartones[juego+j] += m_num_cartones[juego];
+    }
   }
 
-  cout << "La respuesta de la parte 1 es: " << suma << endl;
+  cout << "El resultado de la parte 2 es: " << suma << endl;
+  
 }
