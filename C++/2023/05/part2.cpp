@@ -3,105 +3,87 @@
 #include <string>
 #include <vector>
 #include <array>
+#include <algorithm>
 
 using namespace std;
 
-vector<long> leer_semillas (string linea);
-
-class MapaRango {
-public:
-  vector<long> destino,		// Número base en destino
-    origen,			// Número base en origen
-    rango; 			// Longitud del rango
-  string nombre;
-  MapaRango(string nombre);
-  void leer_linea(string linea);
-  long forward (long num);
-  long backward (long num);
-};
+vector<pair<long, long>> leer_semillas (string linea);
 
 int main()
 {
   ifstream archivo;
   string linea;
-  vector<MapaRango> mapas;
-  vector<long> semillas;
+  vector<pair<long, long>> rangos, buf_rangos;
 
   archivo.open("part2.in");
   while ( getline(archivo, linea) ) {
-    // Pasamos de las líneas vacías
+    // Pasamos de las líneas vacías.
     if ( linea == "")
       continue;
 
-    // Leemos la línea con las semillas
+    // Leemos la línea con las semillas.
     if ( linea.find("seeds:") != string::npos ) {
-      semillas = leer_semillas(linea);
+      buf_rangos = leer_semillas(linea);
       continue;
     }
 
-    // Vamos llenando los mapas en el orden indicado. Esta solución se
-    // basa en que todos los mapas se dan en orden; esto es:
-    //     map_ab, map_bc, map_cd, map_de, etc.
+    // Cuando pasamos a la definición del siguiente mapa, se guardan
+    // las transformaciones de manera permanente.
     if ( linea.find("map:") != string::npos ) {
-      int i_esp = linea.find(" ");
-      mapas.push_back(MapaRango(linea.substr(0, i_esp)));
+      rangos = buf_rangos;
       continue;
     }
 
-    // Añadimos los rangos a la lista de rangos del mapa
+    // Leemos las transformaciones del mapa línea a línea.
     int i_esp = linea.find(" ");
-    mapas.back().destino.push_back(stol(linea.substr(0, i_esp)));
+    long base_dest = stol(linea.substr(0, i_esp));
+    linea = linea.substr(i_esp+1);
 
-    linea = linea.substr(i_esp + 1);
     i_esp = linea.find(" ");
-    mapas.back().origen.push_back(stol(linea.substr(0, i_esp)));
+    long base_orig = stol(linea.substr(0, i_esp));
+    
+    long rango = stol(linea.substr(i_esp+1));
 
-    linea = linea.substr(i_esp + 1);
-    mapas.back().rango.push_back(stol(linea));
+    // Añadimos los rangos que coincidan con alguna transformación.
+    // TO-DO
+
+    // Realizamos un "merge" de todos los rangos en rangos únicos.
+    // TO-DO
+    
   }
   archivo.close();
-
-  // for (MapaRango const& mapa: mapas) {
-  //   cout << endl << mapa.nombre << endl;
-  //   cout << "Size of array: " << mapa.rango.size() << endl;
-  // }
-
-  // EL ARCHIVO YA ESTÁ LEÍDO. YA "SOLO" FALTA LA LÓGICA.
+  
+  return 0;
 }
 
 
-vector<long> leer_semillas (string linea) {
-  vector<long> semillas;
+vector<pair<long, long>> leer_semillas (string linea) {
+  vector<pair<long, long>> semillas;
   int ii;
-  string token;
+  string base, rango;
 
   ii = linea.find(":");
   linea = linea.substr(ii + 1);
   while ( linea != "") {
     ii = linea.find(" ");
-    token = linea.substr(0, ii);
+    base = linea.substr(0, ii);
+    linea = linea.substr(ii + 1);
+
+    if ( (base == "") or (base == " ") )
+      continue;
+    
+    ii = linea.find(" ");
+    rango = linea.substr(0, ii);
     linea = linea.substr(ii + 1);
 
     if ( ii == string::npos ) {
-      token = linea;
+      rango = linea;
       linea = "";
     }    
-    
-    if ( (token == "") or (token == " ") )
-      continue;
 
-    semillas.push_back(stol(token));
+    semillas.push_back({ stol(base), stol(rango) });
   }
 
   return semillas;
   
-}
-
-
-MapaRango::MapaRango (string nombre) {
-  this->nombre = nombre;
-}
-
-void MapaRango::leer_linea(string linea) {
-  cout << "Estamos dentro de un mapa." << endl;
 }
