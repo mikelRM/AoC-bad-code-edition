@@ -6,14 +6,18 @@
 #include <algorithm>
 
 using namespace std;
+using vec2 = vector<pair<long, long>>;
+using vec3 = vector<array<long, 3>>;
 
-vector<pair<long, long>> leer_semillas (string linea);
+vec2 leer_semillas (string linea);
+vec2 propagar_rangos (vec2 rangos, vec3 mapa);
 
 int main()
 {
   ifstream archivo;
   string linea;
-  vector<pair<long, long>> rangos, buf_rangos;
+  vec2 rangos, buf_rangos;
+  vec3 mapa;
 
   archivo.open("part2.in");
   while ( getline(archivo, linea) ) {
@@ -23,14 +27,17 @@ int main()
 
     // Leemos la línea con las semillas.
     if ( linea.find("seeds:") != string::npos ) {
-      buf_rangos = leer_semillas(linea);
+      rangos = leer_semillas(linea);
       continue;
     }
 
     // Cuando pasamos a la definición del siguiente mapa, se guardan
     // las transformaciones de manera permanente.
     if ( linea.find("map:") != string::npos ) {
-      rangos = buf_rangos;
+      if ( not mapa.empty() )
+	rangos = propagar_rangos(rangos, mapa);
+      
+      mapa.clear();
       continue;
     }
 
@@ -38,27 +45,23 @@ int main()
     int i_esp = linea.find(" ");
     long base_dest = stol(linea.substr(0, i_esp));
     linea = linea.substr(i_esp+1);
-
     i_esp = linea.find(" ");
     long base_orig = stol(linea.substr(0, i_esp));
-    
     long rango = stol(linea.substr(i_esp+1));
 
-    // Añadimos los rangos que coincidan con alguna transformación.
-    // TO-DO
-
-    // Realizamos un "merge" de todos los rangos en rangos únicos.
-    // TO-DO
-    
+    mapa.push_back({base_dest, base_orig, rango});    
   }
+
+  // Aquí hay que hacerlo una vez más
+  rangos = propagar_rangos(rangos, mapa);
   archivo.close();
   
   return 0;
 }
 
 
-vector<pair<long, long>> leer_semillas (string linea) {
-  vector<pair<long, long>> semillas;
+vec2 leer_semillas (string linea) {
+  vec2 semillas;
   int ii;
   string base, rango;
 
@@ -79,11 +82,28 @@ vector<pair<long, long>> leer_semillas (string linea) {
     if ( ii == string::npos ) {
       rango = linea;
       linea = "";
-    }    
+    }
 
-    semillas.push_back({ stol(base), stol(rango) });
+    semillas.push_back({stol(base), stol(rango)});
+
   }
-
-  return semillas;
   
+  return semillas;  
+}
+
+
+vec2 propagar_rangos (vec2 rangos, vec3 mapa) {
+  vec2 buffer;
+
+  // Ordenar los mapas según su base_origen
+  sort(mapa.begin(), mapa.end(),
+       [](auto &left, auto &right) { return left[1] < right[1]; });
+  
+  for ( pair<long,long> rango : rangos ) {
+    long inicio = 0;
+    for ( array<long,3> tr : mapa ) {
+      
+    }
+  }
+  return rangos;
 }
