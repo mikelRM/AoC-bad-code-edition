@@ -55,7 +55,12 @@ int main()
   // Aquí hay que hacerlo una vez más
   rangos = propagar_rangos(rangos, mapa);
   archivo.close();
-  
+
+  long minimo = rangos[0].first;
+  for ( pair<long, long> el : rangos)
+    minimo = (el.first < minimo) ? el.first : minimo;
+
+  cout << "La respuesta a la parte 2 es: " << minimo << endl;
   return 0;
 }
 
@@ -98,12 +103,33 @@ vec2 propagar_rangos (vec2 rangos, vec3 mapa) {
   // Ordenar los mapas según su base_origen
   sort(mapa.begin(), mapa.end(),
        [](auto &left, auto &right) { return left[1] < right[1]; });
-  
+
+  // Propagamos los rangos 
   for ( pair<long,long> rango : rangos ) {
-    long inicio = 0;
+    long inicio = rango.first;
     for ( array<long,3> tr : mapa ) {
+      if ( (tr[1] + tr[2] - 1) < inicio )
+	continue;
       
+      if ( tr[1] > (rango.first + rango.second - 1) )
+	continue;
+
+      // Si estamos aquí, los rangos coinciden
+      if (tr[1] > inicio) {
+	buffer.push_back({ inicio, tr[1] - inicio});
+	inicio = tr[1];
+      }
+
+      long diff = tr[0] - tr[1];
+      long rango_min = min(rango.second - (inicio - rango.first), tr[2] - (inicio - tr[1]));
+      buffer.push_back({ inicio + diff, rango_min });
+      inicio = inicio + rango_min;
     }
+
+    // Completamos el trozo del rango que falta, si es que falta:
+    if ( inicio < (rango.first + rango.second) )
+      buffer.push_back({ inicio, rango.second - (inicio - rango.first) });
   }
-  return rangos;
+  
+  return buffer;
 }
