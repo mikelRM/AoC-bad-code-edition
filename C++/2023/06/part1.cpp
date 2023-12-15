@@ -45,16 +45,21 @@ int main ()
       d_carreras.push_back(stoi(token));
   }
 
-  cout << "TIEMPOS: " << endl;
-  for (int t : t_carreras)
-    cout << t << endl;
-
-  cout << endl;
-
-  cout << "DISTANCIAS: " << endl;
-  for (int d : d_carreras)
-    cout << d << endl;
-
   archivo.close();
 
+  long producto = 1;
+  int posibilidades_victoria, distancia, velocidad;
+  for (int i = 0; i < t_carreras.size(); ++i) {
+    posibilidades_victoria = 0;
+    for (int t_pres = 1; t_pres < t_carreras[i]; t_pres++) {
+      velocidad = t_pres;	// Por mera claridad
+      distancia = velocidad * (t_carreras[i] - t_pres);
+      if (distancia > d_carreras[i])
+	posibilidades_victoria += 1;
+    }
+
+    producto = producto * posibilidades_victoria;
+  }
+
+  cout << "La respuesta a la parte 1 es: " << producto << endl;
 }
