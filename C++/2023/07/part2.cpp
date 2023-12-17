@@ -6,7 +6,7 @@
 #include <algorithm>
 
 using namespace std;
-const string orden_cartas = "AKQJT98765432";
+const string orden_cartas = "AKQT98765432J";
 enum JUGADAS {POKER, CUARTETO, FULL, TRIO, DOBLES, PAREJA, NADA};
 
 class Mano {
@@ -27,7 +27,7 @@ int main()
   int i_esp;
   vector<Mano> manos_jugadas;
     
-  archivo.open("part1.in");
+  archivo.open("part2.in");
   while ( getline(archivo, linea) ) {
     i_esp = linea.find(" ");
     manos_jugadas.push_back(Mano(linea.substr(0, i_esp), linea.substr(i_esp + 1)));
@@ -54,7 +54,7 @@ int main()
   for (int ii = 0; ii < manos_jugadas.size(); ++ii)
     suma += manos_jugadas[ii].apuesta * (manos_jugadas.size() - ii);
 
-  cout << "La respuesta a la parte 1 es: " << suma << endl;
+  cout << "La respuesta a la parte 2 es: " << suma << endl;
 }
 
 
@@ -66,8 +66,27 @@ Mano::Mano(string cartas, string apuesta) {
     this->ocr_carta[c] += 1;
   }
 
+  // ASOCIAMOS TODOS LOS JOQUERS A LOS QUE MÁS HAYA
+  // Búsqueda del máximo
+  char fmax;
+  int smax = 0;
+  for (auto const& entry : this->ocr_carta) {
+    if ( (entry.first == 'J') or (smax > entry.second) )
+      continue;
+    fmax = entry.first;
+    smax = entry.second;
+  }
+
+  // Asociación al máximo y la posterior eliminación de la J
+  this->ocr_carta[fmax] += this->ocr_carta['J'];
+  this->ocr_carta.erase('J');
+  
   // DECIDIMOS QUÉ HACEMOS CON TODO ESTO
   switch (this->ocr_carta.size()) {
+  case 0:			// Sólo puede ser si la mano son 'JJJJJ'
+    cout << "POKER DE J: " << this->cartas << endl;
+    this->juego = POKER;
+    break;
   case 1:
     this->juego = POKER;
     break;
@@ -91,9 +110,6 @@ Mano::Mano(string cartas, string apuesta) {
     break;
   default:
     cout << "ERROR EN LA DECISIÓN DE LAS JUGADAS." << endl;
+    cout << this->ocr_carta.size() << endl;
   }
-}
-
-void Mano::print() {
-  cout << "CARTAS:  " << this->cartas << "\t APUESTA:  " << this->apuesta << endl;
 }

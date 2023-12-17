@@ -1,4 +1,4 @@
 all:
-	@g++ part1.cpp
+	@g++ part2.cpp
 	@./a.out
 	@rm a.out
