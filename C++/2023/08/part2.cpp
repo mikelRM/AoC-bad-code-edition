@@ -1,3 +1,12 @@
+// IDEA:
+//  
+// Para cada nodo inicial, buscar el primer punto en el que se cumpla
+// la condición de llegar a un resultado que termine en **Z.
+// Posteriormente se busca el periodo con el que se repite dicha
+// respuesta.  Finalmente se busca el paso en el que este ciclo
+// coincidiría para todos los nodos iniciales mediante una búsqueda de
+// mínimo común múltiplo generalizada. 
+  
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -9,23 +18,19 @@
 
 using namespace std;
 
-map<string, map<char, string>> mapa;
-long long mcm_vector (vector<int> vec);
-
 int main ()
 {
+  map<string, map<char, string>> mapa;
   ifstream archivo;
   string linea, instruccion;
 
   archivo.open("part2.in");
 
-  // La primera linea da la instruccion
+  // La primera linea da la instruccion y la segunda está vacía.
   getline(archivo, instruccion);
-
-  // La segunda linea esta vacia
   getline(archivo, linea);
 
-  // Ahora leemos el mapa
+  // ´Parse´-amos el mapa
   int i_sep;
   while (getline(archivo, linea)) {
     mapa.insert({
@@ -35,72 +40,61 @@ int main ()
       });
   }
 
+  // Buscamos los nodos de inicio: los de la forma **A
   vector<string> nodos;
   for (auto const& par : mapa)
     if (par.first[2] == 'A')
       nodos.push_back(par.first);
   int pasos = 0;
 
-  // Buscar el inicio del ciclo, el tamaño de este y la posición de
-  // los elementos que acaban en 'Z' a partir de los elementos
-  // precedentes.  Coincide que el elemento que acaba con 'Z' es
-  // siempre el último de cada cilo.
-  vector<int> el_preceden, el_ciclo, size_el_visitados;
+  // Búsqueda del inicio del ciclo y su periodo
+  vector<long> desp_ciclo, tamaño_ciclo;
   for (string nodo : nodos) {
-    vector<string> nodos_visitados = { nodo };
-    while (true) {
-      bool salir_del_ciclo = false;
+    cout << "El primer nodo acabado en 'Z' de " << nodo << " es: ";
+    long pos = 0;
+    do {
       for (char c : instruccion) {
+	pos++;
 	nodo = mapa[nodo][c];
-  
-	size_t idx = find(nodos_visitados.begin(),
-			  nodos_visitados.end(), nodo) - nodos_visitados.begin();
-
-	if ( idx < nodos_visitados.size() ) { // Si ya estaba repetido
-	  // cout << "EL PRIMERO QUE SE REPITE: " << nodo << endl;
-	  // cout << "El segundo elemento: " << nodos_visitados[1] << endl;
-	  // cout << "El último del ciclo: " << nodos_visitados.back() << endl;
-	  el_preceden.push_back(idx);
-	  el_ciclo.push_back(nodos_visitados.size() - idx);
-	  size_el_visitados.push_back(nodos_visitados.size());
-	  salir_del_ciclo = true;
-	  break;
-	}
-	nodos_visitados.push_back(nodo);
+	if (nodo[2] == 'Z') break;
       }
-      if (salir_del_ciclo) break;
-    }
+    } while (nodo[2] != 'Z');
+    
+    cout << nodo << endl
+	 << "\tOffset: " << pos << " pasos";
 
-    cout << "El precede:      " << el_preceden.back() << endl
-	 << "Els ciclo:       " << el_ciclo.back() << endl
-	 << "Último elemento: " << nodos_visitados.back() << endl
-	 << "Tamaño visita:   " << nodos_visitados.size() << endl << endl;
+    desp_ciclo.push_back(pos);
+
+    // Ahora medimos el periodo del ciclo
+    pos = 0;
+    string objetivo = nodo;
+    do {
+      for (char c : instruccion) {
+	pos++;
+	nodo = mapa[nodo][c];
+	//if (nodo == objetivo) break;
+	if (nodo[2] == 'Z') break;
+      }
+    // } while (nodo != objetivo);
+    } while (nodo[2] != 'Z');
+
+    cout << "\tPeriodo: " << pos << endl << endl;
+    tamaño_ciclo.push_back(pos);
   }
 
+  // Como resulta que el periodo es el mismo que el offset, y además
+  // todos son divisibles por el tamaño de la cadena de instrucciones,
+  // resultando en NÚMEROS PRIMOS podemos simplemente calcular el
+  // m.c.m. de la siguiente forma:
+  for (long &x : tamaño_ciclo)
+    x = x / instruccion.size();
+
+  long long resultado = 1;
+  for (long const& x : tamaño_ciclo)
+    resultado *= x;
   
-  // Comprobar que todos los elementos que preceden a los ciclos son
-  // del mismo tamaño. 
-  if ((unique(el_preceden.begin(), el_preceden.end()) - el_preceden.begin()) != 1) {
-    cout << "ERROR: El número de elementos precediendo a los ciclos no coindice." << endl;
-    // exit(1);
-  }
-    
-  cout << "El producto: " << mcm_vector(el_ciclo) << endl;
+  cout << "El producto de todos los elementos es: " << resultado << endl;
+  cout << "Como el tamaño de la cadena es de : " << instruccion.size() << endl;
+  cout << "La respuesta a la parte 2 es: " << resultado * instruccion.size() << endl;
 
-  cout << "Tamaño de una cadena de instrucciones: " << instruccion.size() << endl;
-
-  cout << "El resultado de la parte 2 es: "
-       << mcm_vector(el_ciclo) << endl;
-    
-}
-
-int mcd (int a, int b) {
-  if (b == 0)
-    return a;
-  return mcd(b, a % b);
-}
-
-long long mcm_vector(vector<int> vec) {
-  return accumulate(vec.begin(), vec.end(), 1,
-		    [](int x, int y) { return (x*y) / mcd(x, y); });
 }
