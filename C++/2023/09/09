@@ -1,0 +1,9 @@
+  /home/mikel/Development/AoC/C++/2023/09:
+  total used in directory 32 available 858646904
+  drwxr-xr-x 1 mikel mikel   512 Dec 20 12:20 .
+  drwxr-xr-x 1 mikel mikel   512 Dec 19 15:36 ..
+  -rw-r--r-- 1 mikel mikel    54 Dec 20 11:45 Makefile
+  -rw-r--r-- 1 mikel mikel  1262 Dec 20 11:40 part1.cpp
+C -rw-r--r-- 1 mikel mikel 21271 Dec 20 11:40 part2.in
+  -rw-r--r-- 1 mikel mikel 21271 Dec 20 11:40 part1.in
+C -rw-r--r-- 1 mikel mikel  1431 Dec 20 12:20 part2.cpp
