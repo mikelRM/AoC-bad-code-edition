@@ -67,8 +67,6 @@ int main()
   int i_espacio, iii = 0;
 
   while (getline(archivo, linea)) {
-    cout << "Leyendo línea: " << ++iii << endl;
-
     string reg_simb;
     vector<int> reg_num;
     i_espacio = linea.find(" ");
