@@ -1,8 +1,3 @@
-// According to the AoC, this is not giving the correct answer, but I
-// don't know why.  Surprisingly, without the unfolding of the data
-// the answer given by the same program is correct (the answer to the
-// part 1 of the challenge).
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -13,16 +8,6 @@
 using namespace std;
 
 map<pair<string, vector<int>>, long long> mapa_cache;
-
-void repetir_cinco_veces(string& sims, vector<int>& nums) {
-  sims = sims + '?' + sims + '?' + sims + '?' + sims + '?' + sims + "..";
-
-  int nums_size = nums.size();
-  for (int n = 0; n < 4; ++n)
-    for (int i = 0; i < nums_size; ++i)
-      nums.push_back(nums[i]);
-}
-
 
 long long contar(string sims, vector<int> nums,
 	    map<pair<string, vector<int>>, long long>& dp)
@@ -68,29 +53,30 @@ int main()
   ifstream archivo("part2.in");
   string linea;
   int i_espacio;
-  int suma = 0;
+  long long suma = 0;
   
   while (getline(archivo, linea)) {
-    string reg_simb;
-    vector<int> reg_num;
+    string simbs;
+    vector<int> nums;
 
     i_espacio = linea.find(" ");
-    reg_simb = linea.substr(0, i_espacio);
+    simbs = linea.substr(0, i_espacio);
     linea = linea.substr(i_espacio + 1);
 
+    simbs = simbs + "?" + simbs + "?" + simbs + "?" + simbs + "?" + simbs + "..";
+    linea = linea + "," + linea + "," + linea + "," + linea + "," + linea;
     while (linea != "") {
       i_espacio = linea.find(",");
       if (i_espacio != string::npos) {
-	reg_num.push_back(stoi(linea.substr(0, i_espacio)));
+	nums.push_back(stoi(linea.substr(0, i_espacio)));
 	linea = linea.substr(i_espacio + 1);
       } else {
-	reg_num.push_back(stoi(linea));
+	nums.push_back(stoi(linea));
 	linea = "";
       }
     }
 
-    repetir_cinco_veces(reg_simb, reg_num);
-    suma = suma + contar(reg_simb, reg_num, mapa_cache);
+    suma = suma + contar(simbs, nums, mapa_cache);
   }
   
   cout << "El resultado de la parte 2 es: " << suma << endl;
