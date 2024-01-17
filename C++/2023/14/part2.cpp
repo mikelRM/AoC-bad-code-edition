@@ -18,35 +18,58 @@ void rotar_un_ciclo (vector<string>& mapa)
   inclinar_hacia_el_este(mapa);
 }
 
+long calcular_peso (vector<string>& mapa)
+{
+  long peso_total = 0;
+  for (int j = 0; j < mapa.front().size(); ++j) {
+    for (int i = 0; i < mapa.size(); ++i) {
+      if (mapa[i][j] == 'O') {
+	peso_total = peso_total + (mapa.size() - i);
+      }
+    }
+  }
+
+  return peso_total;
+}
+
 int main()
 {
-  ifstream archivo("test.in");
+  ifstream archivo("input.in");
   string linea;
 
   vector<string> mapa_piedras;
-  
   while (getline(archivo, linea)) {
     mapa_piedras.push_back(linea);
   }
 
-  // Los resultados se van repitiendo en ciclos.  Hay que buscar el
-  // tamaño del ciclo y ver en qué punto queda el 1000000000 de la
-  // repetición para seleccionar el mapa correspodiente.  Finalmente,
-  // se calcula el peso hacia el norte.
-  vector<string> mapa_piedras_buffer;
-  for (int contador = 0; contador < 1000000000; ++contador) {
-    mapa_piedras_buffer = mapa_piedras;
+  vector<vector<string>> lista_previos_mapa_piedras = {mapa_piedras};
+  bool salir_del_ciclo = false;
+  int inicio_ciclo, longitud_ciclo;
+  for (int contador = 1; contador < 1000000000; ++contador) {
     rotar_un_ciclo(mapa_piedras);
+    for (int j = 0; j < lista_previos_mapa_piedras.size(); ++j) {
+      if (lista_previos_mapa_piedras[j] == mapa_piedras) {
+	inicio_ciclo = j;
+	longitud_ciclo = contador - j;
+	salir_del_ciclo = true;
+	break;
+      }
+    }
 
-    if (mapa_piedras == mapa_piedras_buffer)
+    if (salir_del_ciclo)
       break;
-    else if (contador % 10000 == 0)
-      cout << "Ciclo: " << contador << endl;
 
+    lista_previos_mapa_piedras.push_back(mapa_piedras);
   }
   
-  
-  //cout << "El resultado de la parte 2 es: " << peso_total << endl;
+  long modulo_ciclo = (1000000000 - inicio_ciclo) % longitud_ciclo;
+  long resultado = calcular_peso(lista_previos_mapa_piedras[inicio_ciclo + modulo_ciclo]);
+  cout << "El resultado de la parte 2 es: " << resultado << endl;
+
+
+  // cout << endl;
+  // for (vector<string>& mapas : lista_previos_mapa_piedras)
+  //   cout << calcular_peso(mapas) << endl;
 }
 
 
@@ -114,5 +137,3 @@ void inclinar_hacia_el_este (vector<string>& mapa)
     }
   }
 }
-
-
